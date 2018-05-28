@@ -20,7 +20,7 @@
  */
 
 #import <Foundation/Foundation.h>
-
+//#import <AppKit/NSAlert.h>
 
 #define POCONV_DEFAULT_STRINGS_FILENAME    @"po.strings"
 #define POCONV_DEBUG_LEVEL                 1
@@ -276,7 +276,7 @@ static BOOL isSource(NSString *line, BOOL *containsNonKde)
 
     return isSource;
 }
-#endif TARGET_CELESTIA
+#endif //TARGET_CELESTIA
 
 /*! Does all the work of reading, converting, and writing. Returns the number of lines successfully converted. */
 static long convertData(NSData *data, NSStringEncoding encoding, NSFileHandle *ofh)
@@ -585,8 +585,15 @@ int main(int argc, const char **argv)
 
         if (gDebugLevel)
             CFShow((CFStringRef)[NSString stringWithFormat:@"poFile='%@', result='%@', ignoreFuzzy=%d, debugLevel=%d, silent=%d", poFilename, (resultFilename ? resultFilename : @"stdout"), gIgnoreFuzzy, gDebugLevel, isSilent]);
-
-        NSData *data = [NSData dataWithContentsOfMappedFile: poFilename];
+        
+        NSURL *poFilenameURL= [NSURL URLWithString:poFilename];
+        NSError * _Nullable *theError=nil;
+        NSData *data =[NSData dataWithContentsOfURL:poFilenameURL options:NSDataReadingMappedIfSafe error:theError];
+      
+        if(theError){
+            CFShowStr((CFStringRef)[(id)theError localizedDescription]);
+        }
+        
         NSMutableCharacterSet *newLineSet = [[[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy] autorelease];
         [newLineSet formIntersectionWithCharacterSet:
             [[NSCharacterSet whitespaceCharacterSet] invertedSet]];
